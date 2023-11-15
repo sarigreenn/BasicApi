@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        .delItem {
+            display: flex;
+            justify-content: space-between;
+            border: black 2px solid;
+            width: 200px;
+
+        }
+
+        .upItem {
+            display: flex;
+            justify-content: space-between;
+            border: black 2px solid;
+            width: 200px;
+
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+    <div id='calendar'></div>
+    <!-- <button onclick="getEvent()">Get Events </button> -->
+    <!-- <input type="text" id="input" placeholder="enter a title">
+    <input type="date" id="myDate" placeholder="enter a date"> -->
+    <!-- <input type="number" id="id" placeholder="enter id for delete"> --> -->
+    <button onclick="upDateEvent()">Update Events </button>
+    <button onclick="addEvent()">Add Events </button>
+    <button onclick="deleteEvent()">Delete Events </button>
+    <button onclick="up()">UpDate </button>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth'
+            });
+            calendar.render();
+            axios.get("https://localhost:7040/api/Event").then(res => {
+
+                var calendarEl = document.getElementById('calendar');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    events: res.data
+                });
+                calendar.render();
+            }
+            )
+        });
+
+        var myTitle;
+        var myDate;
+        function upDateEvent() {
+
+            axios.put(`https://localhost:7040/api/Event/`, {
+                "title": document.querySelector("#input").value,
+                "start": document.querySelector("#myDate").value
+            }).then(res => { console.log(res.data) })
+
+            // setInterval(function () {
+            //     location.reload();
+            // }, 15000);
+            let myUl = document.createElement("ul");
+            axios.get("https://localhost:7040/api/Event").then(res => {
+                for (let item of res.data) {
+                    let myLi = document.createElement("li");
+                    myLi.innerHTML = item.title;
+                    myLi.id = item.id
+                    myLi.setAttribute("onclick", "upDateItem()")
+                    myUl.appendChild(myLi);
+                }
+                document.body.appendChild(myUl);
+            })
+            axios.put(`https://localhost:7040/api/Event`, {
+                "title": document.querySelector("#input").value,
+                "start": document.querySelector("#myDate").value
+            }).then(res => { console.log(res.data) })
+
+        }
+        function upDateItem() {
+
+            let id = event.target.id
+            axios.get("https://localhost:7040/api/Event").then(res => {
+                console.log("id ", id)
+                for (let item of res.data) {
+                    console.log("item.id ", item.id)
+
+                    if (item.id == id) {
+                        console.log("find ")
+                        // myTitle = document.createElement("input");
+                        // myTitle.placeholder = "enter a title";
+                        // document.body.appendChild(myTitle);
+                        // myDate = document.createElement("input");
+                        // myTitle.placeholder = "enter a date";
+                        // document.body.appendChild(myDate);
+                        // myTitle.value = item.title;
+                        // myDate.value = item.start;
+                        document.querySelector("#input").value = item.title;
+                        document.querySelector("#myDate").value = item.start
+
+
+                    }
+                }
+            })
+
+        }
+        function Up() {
+            axios.put(`https://localhost:7040/api/Event/${id}`, {
+                "title": document.querySelector("#input").value,
+                "start": document.querySelector("#myDate").value
+            }).then(res => { console.log(res.data) })
+
+        }
+
+        function addEvent() {
+            myTitle = document.createElement("input");
+            myTitle.placeholder = "enter a title";
+            document.body.appendChild(myTitle);
+            myDate = document.createElement("input");
+            myTitle.placeholder = "enter a date";
+            document.body.appendChild(myDate);
+            axios.post("https://localhost:7040/api/Event", {
+                "title": `${myTitle}`,
+                "start": `${myDate}`
+            }).then(res => {
+                console.log(res.data);
+            })
+            // setInterval(function () {
+            //     location.reload();
+            // }, 15000);
+
+
+        }
+        // function getEvent() {
+        //     axios.get("https://eventsapi.onrender.com/api/Events").then(res => {
+        //         console.log(res.data)
+        //     })
+        // }
+        function deleteItem() {
+            axios.delete(`https://localhost:7040/api/Event/${event.target.id}`).then(res => { console.log(res.data) })
+        }
+        function deleteEvent() {
+            let myUl = document.createElement("ul");
+            axios.get("https://localhost:7040/api/Event").then(res => {
+                for (let item of res.data) {
+                    console.log(item)
+                    let myLi = document.createElement("li");
+                    myLi.innerHTML = item.title;
+                    myLi.id = item.id
+                    myLi.setAttribute("onclick", "deleteItem()")
+                    myUl.appendChild(myLi);
+                }
+                document.body.appendChild(myUl);
+            })
+            // let id = document.querySelector("#id").value;
+
+            setInterval(function () {
+                location.reload();
+            }, 10000);
+        }
+
+    </script>
+
+
+</body>
+
+</html>
